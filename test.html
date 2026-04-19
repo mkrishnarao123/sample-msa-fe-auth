@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Testing - Simple Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005999;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .result {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007acc;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #d32f2f;
+        }
+        .flag-demo {
+            font-size: 2em;
+            margin: 10px;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Custom NPM Packages Testing</h1>
+
+    <div class="section">
+        <h2>Country Flags Library</h2>
+        <p>Testing the country-flags-lib package:</p>
+        <div class="flag-demo">
+            <div>🇺🇸 United States</div>
+            <div>🇩🇪 Germany</div>
+            <div>🇯🇵 Japan</div>
+        </div>
+        <button onclick="testCountryFlag()">Test getCountryFlag Function</button>
+        <div id="flag-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>JWT Token Decoder</h2>
+        <p>Testing the jwt-token-decoder package:</p>
+        <textarea id="jwt-input" placeholder="Paste a JWT token here..."></textarea>
+        <button onclick="decodeJWT()">Decode JWT</button>
+        <button onclick="validateJWT()">Validate JWT Format</button>
+        <button onclick="checkExpiration()">Check Expiration</button>
+        <div id="jwt-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>UUID Generator</h2>
+        <p>Testing the uuid-generator-lib package:</p>
+        <button onclick="generateSingleUUID()">Generate Single UUID</button>
+        <input type="number" id="uuid-count" min="1" max="10" value="3" style="width: 60px;">
+        <button onclick="generateMultipleUUIDs()">Generate Multiple UUIDs</button>
+        <div>
+            <input type="text" id="prefix-input" placeholder="Prefix" style="width: 100px;">
+            <button onclick="generatePrefixedUUID()">Generate Prefixed UUID</button>
+        </div>
+        <button onclick="validateUUIDInput()">Validate UUID</button>
+        <input type="text" id="validate-uuid" placeholder="Enter UUID to validate" style="width: 300px;">
+        <div id="uuid-result" class="result"></div>
+    </div>
+
+    <script type="module">
+        // Import the packages
+        import { CountryFlag, getCountryFlag } from './node_modules/country-flags-lib/dist/country-flags-lib.mjs';
+        import { decodeJWT, isValidJWT, isTokenExpired } from './node_modules/jwt-token-decoder/dist/jwt-token-decoder.mjs';
+        import { generateUUID, generateUUIDs, isValidUUID, generatePrefixedUUID } from './node_modules/uuid-generator-lib/dist/index.js';
+
+        // Make functions available globally for onclick handlers
+        window.testCountryFlag = function() {
+            try {
+                const flag = getCountryFlag('US');
+                document.getElementById('flag-result').innerHTML = `
+                    <strong>getCountryFlag('US'):</strong> ${flag}<br>
+                    <strong>CountryFlag component:</strong> <span style="font-size: 2em;">🇺🇸</span>
+                `;
+            } catch (error) {
+                document.getElementById('flag-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.decodeJWT = function() {
+            const token = document.getElementById('jwt-input').value;
+            if (!token) {
+                document.getElementById('jwt-result').innerHTML = '<span class="error">Please enter a JWT token</span>';
+                return;
+            }
+
+            try {
+                const result = decodeJWT(token);
+                if (result.error) {
+                    document.getElementById('jwt-result').innerHTML = `<span class="error">Error: ${result.error}</span>`;
+                } else {
+                    document.getElementById('jwt-result').innerHTML = `
+                        <strong>Header:</strong><br>
+                        <pre>${JSON.stringify(result.header, null, 2)}</pre>
+                        <strong>Payload:</strong><br>
+                        <pre>${JSON.stringify(result.payload, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('jwt-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.validateJWT = function() {
+            const token = document.getElementById('jwt-input').value;
+            if (!token) {
+                document.getElementById('jwt-result').innerHTML = '<span class="error">Please enter a JWT token</span>';
+                return;
+            }
+
+            try {
+                const isValid = isValidJWT(token);
+                document.getElementById('jwt-result').innerHTML = `<strong>Valid JWT format:</strong> ${isValid ? 'Yes' : 'No'}`;
+            } catch (error) {
+                document.getElementById('jwt-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.checkExpiration = function() {
+            const token = document.getElementById('jwt-input').value;
+            if (!token) {
+                document.getElementById('jwt-result').innerHTML = '<span class="error">Please enter a JWT token</span>';
+                return;
+            }
+
+            try {
+                const isExpired = isTokenExpired(token);
+                document.getElementById('jwt-result').innerHTML = `<strong>Token expired:</strong> ${isExpired ? 'Yes' : 'No'}`;
+            } catch (error) {
+                document.getElementById('jwt-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.generateSingleUUID = function() {
+            try {
+                const uuid = generateUUID();
+                document.getElementById('uuid-result').innerHTML = `<strong>Generated UUID:</strong> ${uuid}`;
+            } catch (error) {
+                document.getElementById('uuid-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.generateMultipleUUIDs = function() {
+            try {
+                const count = parseInt(document.getElementById('uuid-count').value) || 1;
+                const uuids = generateUUIDs(count);
+                document.getElementById('uuid-result').innerHTML = `<strong>Generated ${count} UUIDs:</strong><br>` +
+                    uuids.map(uuid => `<div>${uuid}</div>`).join('');
+            } catch (error) {
+                document.getElementById('uuid-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.generatePrefixedUUID = function() {
+            try {
+                const prefix = document.getElementById('prefix-input').value || 'test';
+                const uuid = generatePrefixedUUID(prefix);
+                document.getElementById('uuid-result').innerHTML = `<strong>Generated prefixed UUID:</strong> ${uuid}`;
+            } catch (error) {
+                document.getElementById('uuid-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.validateUUIDInput = function() {
+            try {
+                const uuid = document.getElementById('validate-uuid').value;
+                if (!uuid) {
+                    document.getElementById('uuid-result').innerHTML = '<span class="error">Please enter a UUID to validate</span>';
+                    return;
+                }
+                const isValid = isValidUUID(uuid);
+                document.getElementById('uuid-result').innerHTML = `<strong>UUID "${uuid}" is valid:</strong> ${isValid ? 'Yes' : 'No'}`;
+            } catch (error) {
+                document.getElementById('uuid-result').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        };
+
+        // Initialize with some demo content
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a sample JWT token for testing
+            const sampleToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjIwMDAwMDAwMDB9.signature';
+            document.getElementById('jwt-input').value = sampleToken;
+
+            // Add a sample UUID for validation
+            document.getElementById('validate-uuid').value = '550e8400-e29b-41d4-a716-446655440000';
+        });
+    </script>
+</body>
+</html>

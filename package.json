@@ -1,0 +1,14 @@
+{
+  "name": "sample-msa-fe-auth",
+  "version": "1.0.0",
+  "description": "Testing custom npm packages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Testing packages...\""
+  },
+  "dependencies": {
+    "country-flags-lib": "file:../countryflags-vue",
+    "jwt-token-decoder": "file:../token-decoder",
+    "uuid-generator-lib": "file:../uuid-generator"
+  }
+}
